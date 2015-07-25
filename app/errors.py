@@ -1,6 +1,6 @@
 from flask import jsonify
 from exceptions import ValidationError
-from . import api
+from api import api
 
 def bad_request(message):
     response = jsonify({'error': 'bad request', 'message': message})
@@ -9,4 +9,4 @@ def bad_request(message):
 
 @api.errorhandler(ValidationError)
 def validation_error(e):
-    bad_request(e.args[0])
+    return bad_request(e.args[0])

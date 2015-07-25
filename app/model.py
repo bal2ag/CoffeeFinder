@@ -27,6 +27,9 @@ class CoffeeShop(db.Model):
 
     @staticmethod
     def from_json(json_coffeeshop):
+        if json_coffeeshop is None:
+            raise ValidationError('json body must be provided')
+
         name = json_coffeeshop.get('name')
         if name is None or name == '' or len(name) > 120:
             raise ValidationError('name must be specified, not blank, and fewer than 121 characters')
@@ -60,19 +63,15 @@ class CoffeeShop(db.Model):
             raise ValidationError('max_seats must be greater than 0')
 
         power = json_coffeeshop.get('power')
-        if power is None or power.lower() not in ['true', 'false']:
+        try:
+            power = bool(power)
+        except (TypeError, ValueError) as e:
             raise ValidationError('power must be specified and either true or false')
 
         wifi = json_coffeeshop.get('wifi')
-        if wifi is None or wifi.lower() not in ['true', 'false']:
+        try:
+            wifi = bool(wifi)
+        except (TypeError, ValueError) as e:
             raise ValidationError('wifi must be specified and either true or false')
 
-       return CoffeeShop(
-               name=name,
-               address=address,
-               zipcode=zipcode,
-               price=price,
-               max_seats=max_seats,
-               power=power,
-               wifi=wifi)
-
+        return CoffeeShop(name=name, address=address, zipcode=zipcode, price=price, max_seats=max_seats, power=power, wifi=wifi) 

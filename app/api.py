@@ -1,8 +1,11 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, Response
+from sqlalchemy.exc import IntegrityError
 
 from model import CoffeeShop
 
 from . import db
+
+import json
 
 api = Blueprint('api', __name__)
 
@@ -14,8 +17,14 @@ def get_coffeeshops():
 
 @api.route('/coffeeshops/', methods=['POST'])
 def add_coffeeshop():
-    coffeeshop = CoffeeShop.from_json(request.json)
-    db.session.add(coffeeshop)
-    db.session.commit()
-    return 201
+    coffeeshop = CoffeeShop.from_json(request.get_json())
+    try:
+        db.session.add(coffeeshop)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        response = jsonify(message='A coffee shop with that name already exists')
+        response.status_code = 400
+        return response
+    return Response(status=201)
 
